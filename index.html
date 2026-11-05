@@ -1,0 +1,286 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEON ESCAPE</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: #080b19;
+  color: white;
+  font-family: Arial, sans-serif;
+  text-align: center;
+  overflow: hidden;
+}
+h1 {
+  color: #00f5ff;
+  text-shadow: 0 0 15px #00f5ff;
+  margin: 12px;
+}
+#info {
+  display: flex;
+  justify-content: center;
+  gap: 25px;
+  font-size: 17px;
+  margin: 10px;
+}
+canvas {
+  background: #10172c;
+  border: 2px solid #00d9ff;
+  box-shadow: 0 0 25px #007caa;
+  width: min(94vw, 600px);
+  height: auto;
+  max-height: 68vh;
+}
+button {
+  background: #00d9ff;
+  border: 0;
+  border-radius: 9px;
+  padding: 12px 23px;
+  margin: 8px;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+}
+button:hover { background: white; }
+#message {
+  position: absolute;
+  top: 43%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #10172cf0;
+  padding: 22px;
+  border: 2px solid #00f5ff;
+  border-radius: 15px;
+  width: min(85vw, 390px);
+}
+#message h2 { color: #00f5ff; }
+.hidden { display: none; }
+.controls button {
+  width: 55px;
+  padding: 12px 0;
+}
+</style>
+</head>
+<body>
+
+<h1>⚡ NEON ESCAPE ⚡</h1>
+
+<div id="info">
+  <span>💎 Punkte: <b id="score">0</b></span>
+  <span>❤️ Leben: <b id="lives">3</b></span>
+  <span>🏆 Rekord: <b id="best">0</b></span>
+</div>
+
+<canvas id="game" width="600" height="600"></canvas>
+
+<div id="message">
+  <h2 id="title">NEON ESCAPE</h2>
+  <p id="description">
+    Sammle Kristalle und weiche den Drohnen aus!
+    <br><br>
+    Steuerung: WASD oder Pfeiltasten.
+  </p>
+  <button onclick="startGame()">SPIEL STARTEN</button>
+</div>
+
+<div class="controls">
+  <button onclick="move('ArrowUp')">▲</button><br>
+  <button onclick="move('ArrowLeft')">◀</button>
+  <button onclick="move('ArrowDown')">▼</button>
+  <button onclick="move('ArrowRight')">▶</button>
+</div>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+let player, enemies, crystal, score, lives;
+let running = false;
+let frame = 0;
+let keys = {};
+let best = Number(localStorage.getItem("neonBest")) || 0;
+
+document.getElementById("best").textContent = best;
+
+function reset() {
+  player = {x:300, y:300, size:17, speed:4};
+  enemies = [
+    {x:70, y:80, size:18, speed:2.1, dx:2, dy:1.5},
+    {x:520, y:500, size:18, speed:2.4, dx:-2, dy:-1}
+  ];
+  score = 0;
+  lives = 3;
+  frame = 0;
+  spawnCrystal();
+  updateInfo();
+}
+
+function spawnCrystal() {
+  crystal = {
+    x: 30 + Math.random()*540,
+    y: 30 + Math.random()*540,
+    size: 10
+  };
+}
+
+function updateInfo() {
+  document.getElementById("score").textContent = score;
+  document.getElementById("lives").textContent = lives;
+  document.getElementById("best").textContent = best;
+}
+
+function startGame() {
+  reset();
+  running = true;
+  document.getElementById("message").classList.add("hidden");
+  requestAnimationFrame(loop);
+}
+
+function move(direction) {
+  if (!running) return;
+  keys[direction] = true;
+  setTimeout(() => keys[direction] = false, 130);
+}
+
+document.addEventListener("keydown", e => {
+  if (["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"," "].includes(e.key))
+    e.preventDefault();
+  keys[e.key] = true;
+});
+document.addEventListener("keyup", e => keys[e.key] = false);
+
+function distance(a,b) {
+  return Math.hypot(a.x-b.x, a.y-b.y);
+}
+
+function drawCircle(x,y,r,color,glow) {
+  ctx.shadowBlur = glow;
+  ctx.shadowColor = color;
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.arc(x,y,r,0,Math.PI*2);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+}
+
+function draw() {
+  ctx.clearRect(0,0,600,600);
+
+  // Hintergrund
+  ctx.strokeStyle = "#1b2945";
+  ctx.lineWidth = 1;
+  for(let i=0;i<600;i+=40) {
+    ctx.beginPath();
+    ctx.moveTo(i,0);
+    ctx.lineTo(i,600);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(0,i);
+    ctx.lineTo(600,i);
+    ctx.stroke();
+  }
+
+  // Kristall
+  ctx.save();
+  ctx.translate(crystal.x,crystal.y);
+  ctx.rotate(frame*0.04);
+  ctx.shadowBlur = 25;
+  ctx.shadowColor = "#00f5ff";
+  ctx.fillStyle = "#00f5ff";
+  ctx.fillRect(-9,-9,18,18);
+  ctx.restore();
+
+  // Spieler
+  drawCircle(player.x,player.y,player.size,"#44ff9a",20);
+
+  // Drohnen
+  enemies.forEach(e => {
+    drawCircle(e.x,e.y,e.size,"#ff3155",22);
+  });
+}
+
+function update() {
+  frame++;
+
+  if(keys.ArrowUp || keys.w) player.y -= player.speed;
+  if(keys.ArrowDown || keys.s) player.y += player.speed;
+  if(keys.ArrowLeft || keys.a) player.x -= player.speed;
+  if(keys.ArrowRight || keys.d) player.x += player.speed;
+
+  player.x = Math.max(player.size,Math.min(600-player.size,player.x));
+  player.y = Math.max(player.size,Math.min(600-player.size,player.y));
+
+  // Kristall einsammeln
+  if(distance(player,crystal)<player.size+crystal.size) {
+    score += 10;
+    spawnCrystal();
+
+    // Mit Punkten werden die Drohnen schneller
+    if(score % 50 === 0) {
+      enemies.push({
+        x:Math.random()*500+50,
+        y:Math.random()*500+50,
+        size:18,
+        speed:2.2+score/100,
+        dx:Math.random()<0.5?2:-2,
+        dy:Math.random()<0.5?2:-2
+      });
+    }
+    updateInfo();
+  }
+
+  // Gegner bewegen
+  enemies.forEach(e => {
+    e.x += e.dx * (e.speed/2);
+    e.y += e.dy * (e.speed/2);
+
+    if(e.x<e.size || e.x>600-e.size) e.dx *= -1;
+    if(e.y<e.size || e.y>600-e.size) e.dy *= -1;
+
+    if(distance(player,e)<player.size+e.size) {
+      lives--;
+      player.x=300;
+      player.y=300;
+      updateInfo();
+
+      // Kurze Schutzzeit
+      frame = -50;
+
+      if(lives<=0) endGame();
+    }
+  });
+}
+
+function endGame() {
+  running = false;
+
+  if(score>best) {
+    best=score;
+    localStorage.setItem("neonBest",best);
+  }
+
+  updateInfo();
+
+  document.getElementById("title").textContent="GAME OVER!";
+  document.getElementById("description").innerHTML =
+    "Du hast <b>"+score+"</b> Punkte erreicht!<br><br>"+
+    (score>=100?"🔥 Unglaublich! Du bist ein NEON-PROFI!":"Versuche es noch einmal!");
+  document.getElementById("message").classList.remove("hidden");
+}
+
+function loop() {
+  if(!running) return;
+  update();
+  draw();
+  requestAnimationFrame(loop);
+}
+
+reset();
+draw();
+</script>
+</body>
+</html>
