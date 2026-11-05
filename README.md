@@ -1,5 +1,10 @@
 # Schule
 
  <a href="neon-apocalypse.html">
-  <button> 🎮 Spiel starten </button>
+  <button> Vertretungsplan </button>
+</a>
+
+
+ <a href="index.html">
+  <button> Itslearning </button>
 </a>
