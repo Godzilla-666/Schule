@@ -1,0 +1,239 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NEON APOCALYPSE</title>
+<style>
+* { box-sizing:border-box; }
+body {
+  margin:0;
+  background:#050510;
+  color:white;
+  font-family:Arial,sans-serif;
+  text-align:center;
+  overflow:hidden;
+}
+h1 {
+  color:#00f7ff;
+  text-shadow:0 0 15px #00f7ff;
+  letter-spacing:5px;
+}
+#hud {
+  display:flex;
+  justify-content:space-around;
+  font-size:18px;
+  padding:10px;
+}
+canvas {
+  background:radial-gradient(#151536,#050510);
+  border:2px solid #00f7ff;
+  box-shadow:0 0 25px #00f7ff55;
+  max-width:95vw;
+  max-height:72vh;
+}
+button {
+  background:#00eaff;
+  border:0;
+  padding:12px 25px;
+  font-weight:bold;
+  cursor:pointer;
+  border-radius:8px;
+  margin:10px;
+}
+</style>
+</head>
+<body>
+<h1>NEON APOCALYPSE</h1>
+<div id="hud">
+  <span>❤️ Leben: <b id="hp">100</b></span>
+  <span>⭐ Score: <b id="score">0</b></span>
+  <span>⚡ Level: <b id="level">1</b></span>
+</div>
+<canvas id="game" width="800" height="500"></canvas>
+<br>
+<button onclick="restart()">NEUSTART</button>
+<p>Steuerung: WASD / Pfeiltasten = Bewegen | Maus = Zielen | Klicken = Schießen</p>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+let player, enemies, bullets, score, hp, level, running;
+let keys = {};
+let mouse = {x:400,y:250};
+let firing = false;
+let lastShot = 0;
+
+function restart() {
+  player = {x:400,y:250,r:15,speed:4};
+  enemies = [];
+  bullets = [];
+  score = 0;
+  hp = 100;
+  level = 1;
+  running = true;
+  updateHUD();
+}
+restart();
+
+document.addEventListener("keydown",e=>keys[e.key.toLowerCase()]=true);
+document.addEventListener("keyup",e=>keys[e.key.toLowerCase()]=false);
+
+canvas.addEventListener("mousemove",e=>{
+  const r=canvas.getBoundingClientRect();
+  mouse.x=(e.clientX-r.left)*canvas.width/r.width;
+  mouse.y=(e.clientY-r.top)*canvas.height/r.height;
+});
+canvas.addEventListener("mousedown",()=>firing=true);
+window.addEventListener("mouseup",()=>firing=false);
+
+function spawnEnemy(){
+  let side=Math.floor(Math.random()*4);
+  let x=side===0?0:side===1?800:Math.random()*800;
+  let y=side===2?0:side===3?500:Math.random()*500;
+  enemies.push({
+    x,y,r:13,
+    speed:1+level*0.15
+  });
+}
+
+function shoot(){
+  const angle=Math.atan2(mouse.y-player.y,mouse.x-player.x);
+  bullets.push({
+    x:player.x,y:player.y,
+    vx:Math.cos(angle)*9,
+    vy:Math.sin(angle)*9
+  });
+}
+
+function update(){
+  if(!running)return;
+
+  if(keys["w"]||keys["arrowup"])player.y-=player.speed;
+  if(keys["s"]||keys["arrowdown"])player.y+=player.speed;
+  if(keys["a"]||keys["arrowleft"])player.x-=player.speed;
+  if(keys["d"]||keys["arrowright"])player.x+=player.speed;
+
+  player.x=Math.max(15,Math.min(785,player.x));
+  player.y=Math.max(15,Math.min(485,player.y));
+
+  if(firing && Date.now()-lastShot>180){
+    shoot();
+    lastShot=Date.now();
+  }
+
+  if(Math.random()<0.025+level*0.002)spawnEnemy();
+
+  bullets.forEach(b=>{
+    b.x+=b.vx;
+    b.y+=b.vy;
+  });
+
+  enemies.forEach(e=>{
+    const a=Math.atan2(player.y-e.y,player.x-e.x);
+    e.x+=Math.cos(a)*e.speed;
+    e.y+=Math.sin(a)*e.speed;
+
+    if(Math.hypot(player.x-e.x,player.y-e.y)<player.r+e.r){
+      hp-=0.5;
+      if(hp<=0){
+        hp=0;
+        running=false;
+      }
+    }
+  });
+
+  bullets.forEach(b=>{
+    enemies.forEach(e=>{
+      if(Math.hypot(b.x-e.x,b.y-e.y)<e.r+5){
+        e.dead=true;
+        b.dead=true;
+        score+=10;
+      }
+    });
+  });
+
+  bullets=bullets.filter(b=>!b.dead&&b.x>=0&&b.x<=800&&b.y>=0&&b.y<=500);
+  enemies=enemies.filter(e=>!e.dead);
+
+  level=1+Math.floor(score/150);
+  updateHUD();
+}
+
+function updateHUD(){
+  document.getElementById("hp").textContent=Math.ceil(hp);
+  document.getElementById("score").textContent=score;
+  document.getElementById("level").textContent=level;
+}
+
+function draw(){
+  ctx.clearRect(0,0,800,500);
+
+  // Neon grid
+  ctx.strokeStyle="#22224a";
+  ctx.lineWidth=1;
+  for(let x=0;x<800;x+=40){
+    ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,500);ctx.stroke();
+  }
+  for(let y=0;y<500;y+=40){
+    ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(800,y);ctx.stroke();
+  }
+
+  // Player
+  ctx.shadowBlur=20;
+  ctx.shadowColor="#00ffff";
+  ctx.fillStyle="#00ffff";
+  ctx.beginPath();
+  ctx.arc(player.x,player.y,player.r,0,Math.PI*2);
+  ctx.fill();
+
+  // Aim line
+  ctx.strokeStyle="#00ffff55";
+  ctx.beginPath();
+  ctx.moveTo(player.x,player.y);
+  ctx.lineTo(mouse.x,mouse.y);
+  ctx.stroke();
+
+  // Bullets
+  ctx.fillStyle="#ffff00";
+  bullets.forEach(b=>{
+    ctx.beginPath();
+    ctx.arc(b.x,b.y,5,0,Math.PI*2);
+    ctx.fill();
+  });
+
+  // Enemies
+  ctx.shadowColor="#ff0055";
+  ctx.fillStyle="#ff0055";
+  enemies.forEach(e=>{
+    ctx.beginPath();
+    ctx.arc(e.x,e.y,e.r,0,Math.PI*2);
+    ctx.fill();
+  });
+
+  ctx.shadowBlur=0;
+
+  if(!running){
+    ctx.fillStyle="#000000bb";
+    ctx.fillRect(0,0,800,500);
+    ctx.fillStyle="#ff0055";
+    ctx.font="bold 55px Arial";
+    ctx.textAlign="center";
+    ctx.fillText("GAME OVER",400,230);
+    ctx.fillStyle="white";
+    ctx.font="22px Arial";
+    ctx.fillText("Score: "+score+" | Neustart drücken",400,275);
+  }
+}
+
+function loop(){
+  update();
+  draw();
+  requestAnimationFrame(loop);
+}
+loop();
+</script>
+</body>
+</html>
