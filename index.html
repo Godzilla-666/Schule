@@ -4,97 +4,330 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NEON ESCAPE</title>
+<title>NEON ESCAPE | Gaming</title>
+
 <style>
-* { box-sizing: border-box; }
-body {
+* {
+  box-sizing: border-box;
   margin: 0;
-  background: #080b19;
+  padding: 0;
+}
+
+body {
+  background: #060817;
   color: white;
   font-family: Arial, sans-serif;
+  overflow-x: hidden;
+}
+
+/* HOMEPAGE */
+
+#home {
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at 50% 40%, #152957 0%, #080b1d 55%, #03040b 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
+  padding: 25px;
+  position: relative;
   overflow: hidden;
 }
-h1 {
-  color: #00f5ff;
-  text-shadow: 0 0 15px #00f5ff;
-  margin: 12px;
+
+#home::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(#00d9ff12 1px, transparent 1px),
+    linear-gradient(90deg,#00d9ff12 1px,transparent 1px);
+  background-size: 45px 45px;
+  transform: perspective(400px) rotateX(30deg) scale(1.5);
+  opacity: .5;
 }
+
+.home-content {
+  position: relative;
+  z-index: 2;
+}
+
+.logo {
+  color: #00eeff;
+  font-size: clamp(40px, 9vw, 85px);
+  font-weight: 900;
+  letter-spacing: 7px;
+  text-shadow: 0 0 15px #00d9ff, 0 0 45px #007bff;
+  animation: pulse 2s infinite alternate;
+}
+
+@keyframes pulse {
+  from { text-shadow: 0 0 10px #00d9ff; }
+  to { text-shadow: 0 0 35px #00d9ff, 0 0 70px #006aff; }
+}
+
+.subtitle {
+  color: #9bb8d7;
+  letter-spacing: 5px;
+  margin-top: 15px;
+  font-size: 13px;
+}
+
+.hero {
+  font-size: 65px;
+  margin: 35px 0 15px;
+  filter: drop-shadow(0 0 20px #00d9ff);
+}
+
+.description {
+  color: #aab9d0;
+  line-height: 1.8;
+  max-width: 500px;
+  margin: 20px auto 35px;
+}
+
+.main-btn {
+  padding: 18px 55px;
+  border: 2px solid #00eaff;
+  border-radius: 8px;
+  background: linear-gradient(135deg,#007bff,#00d9ff);
+  color: white;
+  font-size: 19px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 0 25px #00c8ff80;
+  transition: .25s;
+}
+
+.main-btn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 45px #00c8ff;
+}
+
+.features {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 55px;
+}
+
+.feature {
+  border: 1px solid #174b76;
+  background: #0b1730bb;
+  border-radius: 12px;
+  padding: 17px 25px;
+  color: #9ddcff;
+  min-width: 125px;
+}
+
+footer {
+  position: absolute;
+  bottom: 15px;
+  color: #526c91;
+  font-size: 11px;
+}
+
+/* GAME */
+
+#gameScreen {
+  display: none;
+  min-height: 100vh;
+  text-align: center;
+  padding: 15px;
+  background: radial-gradient(#13203d,#060817);
+}
+
+.game-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 650px;
+  margin: 0 auto 15px;
+  gap: 10px;
+}
+
+.back-btn {
+  padding: 10px 15px;
+  border: 1px solid #00d9ff;
+  background: #0b1932;
+  color: #00eaff;
+  border-radius: 7px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+h2 {
+  color: #00eaff;
+  text-shadow: 0 0 15px #00eaff;
+}
+
 #info {
   display: flex;
   justify-content: center;
   gap: 25px;
-  font-size: 17px;
-  margin: 10px;
+  margin: 12px;
+  flex-wrap: wrap;
 }
+
 canvas {
+  width: min(94vw,600px);
+  height: auto;
   background: #10172c;
   border: 2px solid #00d9ff;
   box-shadow: 0 0 25px #007caa;
-  width: min(94vw, 600px);
-  height: auto;
-  max-height: 68vh;
+  border-radius: 5px;
+  max-height: 65vh;
 }
-button {
-  background: #00d9ff;
-  border: 0;
-  border-radius: 9px;
-  padding: 12px 23px;
-  margin: 8px;
-  font-weight: bold;
-  font-size: 16px;
-  cursor: pointer;
-}
-button:hover { background: white; }
-#message {
-  position: absolute;
-  top: 43%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: #10172cf0;
-  padding: 22px;
-  border: 2px solid #00f5ff;
-  border-radius: 15px;
-  width: min(85vw, 390px);
-}
-#message h2 { color: #00f5ff; }
-.hidden { display: none; }
+
 .controls button {
   width: 55px;
   padding: 12px 0;
+  margin: 4px;
+  background: #102c50;
+  border: 1px solid #00d9ff;
+  color: white;
+  border-radius: 8px;
+  font-size: 20px;
+  touch-action: none;
+  cursor: pointer;
+}
+
+#message {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%);
+  background: #10172cf5;
+  border: 2px solid #00f5ff;
+  border-radius: 15px;
+  padding: 25px;
+  width: min(85vw,390px);
+  z-index: 10;
+  box-shadow: 0 0 35px #00d9ff80;
+}
+
+#message h2 {
+  margin-bottom: 15px;
+}
+
+#message p {
+  line-height: 1.7;
+}
+
+.hidden {
+  display: none !important;
 }
 </style>
 </head>
+
 <body>
 
-<h1>⚡ NEON ESCAPE ⚡</h1>
+<!-- HOMEPAGE -->
 
-<div id="info">
-  <span>💎 Punkte: <b id="score">0</b></span>
-  <span>❤️ Leben: <b id="lives">3</b></span>
-  <span>🏆 Rekord: <b id="best">0</b></span>
-</div>
+<section id="home">
 
-<canvas id="game" width="600" height="600"></canvas>
+  <div class="home-content">
 
-<div id="message">
+    <div class="logo">NEON ESCAPE</div>
+
+    <div class="subtitle">
+      THE ULTIMATE ARCADE EXPERIENCE
+    </div>
+
+    <div class="hero">⚡</div>
+
+    <h2>WILLKOMMEN IN DER ARENA</h2>
+
+    <p class="description">
+      Deine Mission beginnt jetzt.<br>
+      Sammle Energie, weiche Gegnern aus und
+      beweise, dass du der beste Spieler bist.
+      <br><br>
+      Bist du bereit?
+    </p>
+
+    <button class="main-btn" onclick="openGame()">
+      ▶ SPIELEN
+    </button>
+
+    <div class="features">
+      <div class="feature">💎<br>Kristalle</div>
+      <div class="feature">👾<br>Gegner</div>
+      <div class="feature">🏆<br>Highscores</div>
+    </div>
+
+  </div>
+
+  <footer>
+    NEON ESCAPE © 2026 | ARCADE GAMING
+  </footer>
+
+</section>
+
+
+<!-- GAME SCREEN -->
+
+<section id="gameScreen">
+
+  <div class="game-header">
+    <button class="back-btn" onclick="goHome()">
+      ◀ HOMEPAGE
+    </button>
+
+    <h2>⚡ NEON ESCAPE</h2>
+
+    <span>🎮 ARCADE</span>
+  </div>
+
+  <div id="info">
+    <span>💎 Punkte: <b id="score">0</b></span>
+    <span>❤️ Leben: <b id="lives">3</b></span>
+    <span>🏆 Rekord: <b id="best">0</b></span>
+  </div>
+
+  <canvas id="game" width="600" height="600"></canvas>
+
+  <div class="controls">
+    <br>
+    <button
+      onpointerdown="move('ArrowUp')"
+      onpointerup="stopMove('ArrowUp')"
+      onpointerleave="stopMove('ArrowUp')">▲</button>
+    <br>
+    <button
+      onpointerdown="move('ArrowLeft')"
+      onpointerup="stopMove('ArrowLeft')"
+      onpointerleave="stopMove('ArrowLeft')">◀</button>
+    <button
+      onpointerdown="move('ArrowDown')"
+      onpointerup="stopMove('ArrowDown')"
+      onpointerleave="stopMove('ArrowDown')">▼</button>
+    <button
+      onpointerdown="move('ArrowRight')"
+      onpointerup="stopMove('ArrowRight')"
+      onpointerleave="stopMove('ArrowRight')">▶</button>
+  </div>
+
+</section>
+
+
+<div id="message" class="hidden">
   <h2 id="title">NEON ESCAPE</h2>
   <p id="description">
     Sammle Kristalle und weiche den Drohnen aus!
     <br><br>
     Steuerung: WASD oder Pfeiltasten.
   </p>
-  <button onclick="startGame()">SPIEL STARTEN</button>
+  <button class="main-btn" onclick="startGame()">
+    SPIEL STARTEN
+  </button>
 </div>
 
-<div class="controls">
-  <button onclick="move('ArrowUp')">▲</button><br>
-  <button onclick="move('ArrowLeft')">◀</button>
-  <button onclick="move('ArrowDown')">▼</button>
-  <button onclick="move('ArrowRight')">▶</button>
-</div>
 
 <script>
+
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
@@ -106,24 +339,52 @@ let best = Number(localStorage.getItem("neonBest")) || 0;
 
 document.getElementById("best").textContent = best;
 
+
+// SEITENWECHSEL
+
+function openGame() {
+  document.getElementById("home").style.display = "none";
+  document.getElementById("gameScreen").style.display = "block";
+
+  document.getElementById("message").classList.remove("hidden");
+  document.getElementById("title").textContent = "BEREIT?";
+  document.getElementById("description").textContent =
+    "Sammle Kristalle und überlebe die Arena!";
+}
+
+function goHome() {
+  running = false;
+  keys = {};
+
+  document.getElementById("gameScreen").style.display = "none";
+  document.getElementById("home").style.display = "flex";
+  document.getElementById("message").classList.add("hidden");
+}
+
+
+// SPIEL
+
 function reset() {
-  player = {x:300, y:300, size:17, speed:4};
+  player = {x:300,y:300,size:17,speed:4};
+
   enemies = [
-    {x:70, y:80, size:18, speed:2.1, dx:2, dy:1.5},
-    {x:520, y:500, size:18, speed:2.4, dx:-2, dy:-1}
+    {x:70,y:80,size:18,speed:2.1,dx:2,dy:1.5},
+    {x:520,y:500,size:18,speed:2.4,dx:-2,dy:-1}
   ];
+
   score = 0;
   lives = 3;
   frame = 0;
+
   spawnCrystal();
   updateInfo();
 }
 
 function spawnCrystal() {
   crystal = {
-    x: 30 + Math.random()*540,
-    y: 30 + Math.random()*540,
-    size: 10
+    x:30+Math.random()*540,
+    y:30+Math.random()*540,
+    size:10
   };
 }
 
@@ -136,25 +397,32 @@ function updateInfo() {
 function startGame() {
   reset();
   running = true;
+
   document.getElementById("message").classList.add("hidden");
+
   requestAnimationFrame(loop);
 }
 
 function move(direction) {
-  if (!running) return;
-  keys[direction] = true;
-  setTimeout(() => keys[direction] = false, 130);
+  if(running) keys[direction] = true;
 }
 
-document.addEventListener("keydown", e => {
-  if (["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"," "].includes(e.key))
+function stopMove(direction) {
+  keys[direction] = false;
+}
+
+document.addEventListener("keydown",e=>{
+  if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"," "].includes(e.key))
     e.preventDefault();
   keys[e.key] = true;
 });
-document.addEventListener("keyup", e => keys[e.key] = false);
+
+document.addEventListener("keyup",e=>{
+  keys[e.key] = false;
+});
 
 function distance(a,b) {
-  return Math.hypot(a.x-b.x, a.y-b.y);
+  return Math.hypot(a.x-b.x,a.y-b.y);
 }
 
 function drawCircle(x,y,r,color,glow) {
@@ -170,35 +438,32 @@ function drawCircle(x,y,r,color,glow) {
 function draw() {
   ctx.clearRect(0,0,600,600);
 
-  // Hintergrund
   ctx.strokeStyle = "#1b2945";
-  ctx.lineWidth = 1;
+
   for(let i=0;i<600;i+=40) {
     ctx.beginPath();
     ctx.moveTo(i,0);
     ctx.lineTo(i,600);
     ctx.stroke();
+
     ctx.beginPath();
     ctx.moveTo(0,i);
     ctx.lineTo(600,i);
     ctx.stroke();
   }
 
-  // Kristall
   ctx.save();
   ctx.translate(crystal.x,crystal.y);
-  ctx.rotate(frame*0.04);
+  ctx.rotate(frame*.04);
   ctx.shadowBlur = 25;
   ctx.shadowColor = "#00f5ff";
   ctx.fillStyle = "#00f5ff";
   ctx.fillRect(-9,-9,18,18);
   ctx.restore();
 
-  // Spieler
   drawCircle(player.x,player.y,player.size,"#44ff9a",20);
 
-  // Drohnen
-  enemies.forEach(e => {
+  enemies.forEach(e=>{
     drawCircle(e.x,e.y,e.size,"#ff3155",22);
   });
 }
@@ -214,41 +479,37 @@ function update() {
   player.x = Math.max(player.size,Math.min(600-player.size,player.x));
   player.y = Math.max(player.size,Math.min(600-player.size,player.y));
 
-  // Kristall einsammeln
   if(distance(player,crystal)<player.size+crystal.size) {
     score += 10;
     spawnCrystal();
 
-    // Mit Punkten werden die Drohnen schneller
-    if(score % 50 === 0) {
+    if(score%50===0) {
       enemies.push({
         x:Math.random()*500+50,
         y:Math.random()*500+50,
         size:18,
         speed:2.2+score/100,
-        dx:Math.random()<0.5?2:-2,
-        dy:Math.random()<0.5?2:-2
+        dx:Math.random()<.5?2:-2,
+        dy:Math.random()<.5?2:-2
       });
     }
+
     updateInfo();
   }
 
-  // Gegner bewegen
-  enemies.forEach(e => {
-    e.x += e.dx * (e.speed/2);
-    e.y += e.dy * (e.speed/2);
+  enemies.forEach(e=>{
+    e.x += e.dx*(e.speed/2);
+    e.y += e.dy*(e.speed/2);
 
     if(e.x<e.size || e.x>600-e.size) e.dx *= -1;
     if(e.y<e.size || e.y>600-e.size) e.dy *= -1;
 
-    if(distance(player,e)<player.size+e.size) {
+    if(frame>0 && distance(player,e)<player.size+e.size) {
       lives--;
       player.x=300;
       player.y=300;
+      frame=-50;
       updateInfo();
-
-      // Kurze Schutzzeit
-      frame = -50;
 
       if(lives<=0) endGame();
     }
@@ -268,19 +529,24 @@ function endGame() {
   document.getElementById("title").textContent="GAME OVER!";
   document.getElementById("description").innerHTML =
     "Du hast <b>"+score+"</b> Punkte erreicht!<br><br>"+
-    (score>=100?"🔥 Unglaublich! Du bist ein NEON-PROFI!":"Versuche es noch einmal!");
+    (score>=100?"🔥 NEON-PROFI!":"Versuche es noch einmal!");
+
   document.getElementById("message").classList.remove("hidden");
 }
 
 function loop() {
   if(!running) return;
+
   update();
   draw();
-  requestAnimationFrame(loop);
+
+  if(running) requestAnimationFrame(loop);
 }
 
 reset();
 draw();
+
 </script>
+
 </body>
 </html>
